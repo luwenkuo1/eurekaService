@@ -1,0 +1,63 @@
+server:
+  port: 8100
+
+eureka:
+  instance:
+    hostname: discovery1
+  client:
+
+    # 单节点时没必要注册
+    registerWithEureka: true #是否注册到eureka
+    fetchRegistry: true  # 是否拉取注册信息
+    serviceUrl:
+      defaultZone: http://192.168.1.112:8200/eureka/  #集群模式相互注册
+  server:
+    #自我保护模式：
+    # 当网络分区发生故障时，eureka client无法发送心跳至eureka server，但是eureka client本身并没有问题，
+    # 自我保护模式正是一种针对网络异常波动的安全保护措施，使用自我保护模式能使Eureka集群更加的健壮、稳定的运行。
+    # 自我保护机制的工作机制是如果在15分钟内超过85%的客户端节点都没有正常的心跳，那么Eureka就认为客户端与注册中心出现了网络故障，
+    # Eureka Server自动进入自我保护机制，此时会出现以下几种情况：
+    # 1、Eureka Server不再从注册列表中移除因为长时间没收到心跳而应该过期的服务。
+    # 2、Eureka Server仍然能够接受新服务的注册和查询请求，但是不会被同步到其它节点上，保证当前节点依然可用。
+    # 3、当网络稳定时，当前Eureka Server新的注册信息会被同步到其它节点中。
+    # 它宁可保留所有微服务，健康的与不健康的，也不盲目注销微服务，在开发环境下，若需要及时剔除连接不上的为服务，需要关闭自我保护模式，然后调整心跳时间与服务过期时间。
+    enable-self-preservation: true #启用自我保护机制，默认为true
+    eviction-interval-timer-in-ms: 60000 #清除无效服务实例的时间间隔（ms），默认1分钟
+    renewal-percent-threshold: 0.85 #15分钟内续约服务的比例小于0.85，则开启自我保护机制，再此期间不会清除已注册的任何服务（即便是无效服务）
+spring:
+  application:
+    name: eurka-server
+  profiles: discovery1
+
+
+---
+server:
+  port: 8200
+
+eureka:
+  instance:
+    hostname: discovery2
+  client:
+
+    # 单节点时没必要注册
+    registerWithEureka: true #是否注册到eureka
+    fetchRegistry: true  # 是否拉取注册信息
+    serviceUrl:
+      defaultZone: http://192.168.1.112:8100/eureka/  #集群模式相互注册
+  server:
+        #自我保护模式：
+        # 当网络分区发生故障时，eureka client无法发送心跳至eureka server，但是eureka client本身并没有问题，
+        # 自我保护模式正是一种针对网络异常波动的安全保护措施，使用自我保护模式能使Eureka集群更加的健壮、稳定的运行。
+        # 自我保护机制的工作机制是如果在15分钟内超过85%的客户端节点都没有正常的心跳，那么Eureka就认为客户端与注册中心出现了网络故障，
+        # Eureka Server自动进入自我保护机制，此时会出现以下几种情况：
+        # 1、Eureka Server不再从注册列表中移除因为长时间没收到心跳而应该过期的服务。
+        # 2、Eureka Server仍然能够接受新服务的注册和查询请求，但是不会被同步到其它节点上，保证当前节点依然可用。
+        # 3、当网络稳定时，当前Eureka Server新的注册信息会被同步到其它节点中。
+        # 它宁可保留所有微服务，健康的与不健康的，也不盲目注销微服务，在开发环境下，若需要及时剔除连接不上的为服务，需要关闭自我保护模式，然后调整心跳时间与服务过期时间。
+    enable-self-preservation: true #启用自我保护机制，默认为true
+    eviction-interval-timer-in-ms: 60000 #清除无效服务实例的时间间隔（ms），默认1分钟
+    renewal-percent-threshold: 0.85 #15分钟内续约服务的比例小于0.85，则开启自我保护机制，再此期间不会清除已注册的任何服务（即便是无效服务）
+spring:
+  application:
+    name: eurka-server
+  profiles: discovery2
